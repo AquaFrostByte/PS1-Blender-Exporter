@@ -440,12 +440,15 @@ class ExportPS1(Operator, ExportHelper):
                         uv_offset += 3
                     
                 elif len(poly.vertices) == 4:
-                    # Quad: [3, 2, 0, 1]
+                    # Quad: [3, 2, 1, 0] - reverses winding while keeping the
+                    # four corners in perimeter order (was [3, 2, 0, 1], which
+                    # crossed the two diagonals and produced a bowtie/
+                    # self-intersecting quad instead of a flat one).
                     vert_indices = [
                         mesh.loops[poly.loop_start + 3].vertex_index + vertex_offset,
                         mesh.loops[poly.loop_start + 2].vertex_index + vertex_offset,
-                        mesh.loops[poly.loop_start].vertex_index + vertex_offset,
-                        mesh.loops[poly.loop_start + 1].vertex_index + vertex_offset
+                        mesh.loops[poly.loop_start + 1].vertex_index + vertex_offset,
+                        mesh.loops[poly.loop_start].vertex_index + vertex_offset
                     ]
                     
                     # Extract UVs for this quad with THIS polygon's texture dimensions
@@ -463,14 +466,14 @@ class ExportPS1(Operator, ExportHelper):
                             'u': round(uv.x * tex_width),
                             'v': round(tex_height - (uv.y * tex_height))
                         })
-                        # UV 0
-                        uv = uv_layer[poly.loop_start].uv
+                        # UV 1
+                        uv = uv_layer[poly.loop_start + 1].uv
                         all_uvs.append({
                             'u': round(uv.x * tex_width),
                             'v': round(tex_height - (uv.y * tex_height))
                         })
-                        # UV 1
-                        uv = uv_layer[poly.loop_start + 1].uv
+                        # UV 0
+                        uv = uv_layer[poly.loop_start].uv
                         all_uvs.append({
                             'u': round(uv.x * tex_width),
                             'v': round(tex_height - (uv.y * tex_height))
